@@ -54,6 +54,7 @@ router.get("/tweets", authenticated, tweetsController.getTweets);
 router.post("/tweets", authenticated, tweetsController.postTweet);
 router.post("/users/:followingUserId/follow", userController.postFollow);
 
+router.post('/users/:id/subscribe', userController.postSubcribe) //訂閱其他使用者
 router.get("/users/:id/tweets", authenticated, userController.getUser);
 router.get("/users/:id/replies", authenticated, replyController.getReplies);
 router.get("/users/:id/likes", authenticated, likesController.getLikes);
@@ -68,6 +69,11 @@ router.post('/api/image', upload.fields([
 router.post('/api/imagex', authenticated, apiController.deleteImage)
 router.get("/settings", authenticated, userController.getSetting); // 個人資料設定
 router.put("/settings", authenticated, userController.putSetting); // 個人資料編輯
+
+router.get('/messages/notify', (req, res) => {
+  res.render('notify')
+})
+
 router.use('/', (req, res) => res.redirect('/tweets'));
 router.use("/", generalErrorHandler);
 

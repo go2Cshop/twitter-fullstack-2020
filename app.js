@@ -30,7 +30,7 @@ require('./helpers/socket-helpers')(io)
 
 
 app.set("view engine", "hbs");
-app.engine("hbs", handlebars({ extname: ".hbs", helpers: handlebarsHelpers }));
+app.engine("hbs", handlebars({ defaultLayout: 'main', extname: ".hbs", helpers: handlebarsHelpers }));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
@@ -51,16 +51,16 @@ app.use((req, res, next) => {
     account_messages,
   } = req.flash();
 
-   res.locals = {
-     currentUser: user,
-     success_messages,
-     error_messages,
-     warning_messages,
-     info_messages,
-     account_messages,
-     user: helpers.getUser(req),
-     paramsUser: req.params.user,
-   };
+  res.locals = {
+    currentUser: user,
+    success_messages,
+    error_messages,
+    warning_messages,
+    info_messages,
+    account_messages,
+    user: helpers.getUser(req),
+    paramsUser: req.params.user,
+  };
 
   // res.locals.currentUser = req.user;
   // res.locals.success_messages = req.flash("success_messages");

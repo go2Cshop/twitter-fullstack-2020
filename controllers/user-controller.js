@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
-const { Tweet, User, Reply, Like, Followship, sequelize} = require("../models");
+const { Tweet, User, Reply, Like, Followship, sequelize } = require("../models");
 const { getEightRandomUsers } = require("../helpers/randomUsersHelper");
 const helpers = require("../_helpers");
 const userController = {
@@ -131,28 +131,28 @@ const userController = {
     }
   },
   getUser: async (req, res, next) => {
-  const isUser =
-    helpers.getUser(req).id === Number(req.params.id) ? true : false;
-  try {
-    const userId = req.params.id;
-    const currentUserId = helpers.getUser(req).id;
-    const user = await User.findByPk(userId, {
-      include: [
-        {
-          model: Tweet,
-          include: [
-            { model: User },
-            { model: Reply, include: [{ model: Tweet }] },
-            { model: Like },
-          ]
-        },
-        { model: User, as: "Followers" },
-        { model: User, as: "Followings" },
-      ],
-      order: [["Tweets","updatedAt", "DESC"]]
-    });
+    const isUser =
+      helpers.getUser(req).id === Number(req.params.id) ? true : false;
+    try {
+      const userId = req.params.id;
+      const currentUserId = helpers.getUser(req).id;
+      const user = await User.findByPk(userId, {
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: User },
+              { model: Reply, include: [{ model: Tweet }] },
+              { model: Like },
+            ]
+          },
+          { model: User, as: "Followers" },
+          { model: User, as: "Followings" },
+        ],
+        order: [["Tweets", "updatedAt", "DESC"]]
+      });
 
-    if (!user) throw new Error('使用者不存在')
+      if (!user) throw new Error('使用者不存在')
       const userData = user.toJSON();
       const recommend = await getEightRandomUsers(req);
 
@@ -231,7 +231,6 @@ const userController = {
       next(err)
     }
   },
-
   getFollowing: async (req, res, next) => {
     // 跟隨中
     try {
@@ -240,7 +239,7 @@ const userController = {
       const user = await User.findByPk(userId, {
         include: [
           { model: User, as: 'Followers', include: { model: User, as: 'Followers' } },
-          { model: User, as: 'Followings', include: { model: User, as: 'Followers' }}
+          { model: User, as: 'Followings', include: { model: User, as: 'Followers' } }
         ],
         order: [[sequelize.col('Followings.Followship.createdAt'), 'DESC']]
       });
@@ -331,6 +330,10 @@ const userController = {
       })
       .catch((err) => next(err));
   },
+  postSubcribe: async (req, res, next) => {
+    console.log(`------------${req.user.id}***********************`)
+    console.log(`**********************${req.params.userId}***********************`)
+  }
 };
 
 module.exports = userController;
