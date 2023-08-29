@@ -12,8 +12,10 @@ const apiController = require('../controllers/api-controller')
 const { authenticated, authenticatedAdmin } = require("../middleware/auth");
 const { generalErrorHandler } = require("../middleware/error-handler");
 const admin = require("./modules/admin");
+const chatroom = require('./modules/chatroom')
 
 router.use("/admin", admin);
+router.use('/chatroom', chatroom)
 
 router.get("/signup", userController.signupPage);
 router.post("/signup", userController.signup);
