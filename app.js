@@ -15,8 +15,19 @@ const app = express();
 const port = process.env.PORT || 3000;
 const SESSION_SECRET = "secret";
 
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
 // use helpers.getUser(req) to replace req.user
 // use helpers.ensureAuthenticated(req) to replace req.isAuthenticated()
+// io.use((socket, next) => {
+//   sessionMiddleware(socket.request, socket.request.res, next);
+// })
+
+require('./helpers/socket-helpers')(io)
+
 
 app.set("view engine", "hbs");
 app.engine("hbs", handlebars({ extname: ".hbs", helpers: handlebarsHelpers }));
@@ -62,7 +73,9 @@ app.use((req, res, next) => {
   next();
 });
 
+
+
 app.use(routes);
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+server.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 module.exports = app;
