@@ -18,6 +18,7 @@ const SESSION_SECRET = "secret";
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const socketHelpers = require("./helpers/socket-helpers");
 const io = new Server(server);
 
 // use helpers.getUser(req) to replace req.user
@@ -26,7 +27,7 @@ const io = new Server(server);
 //   sessionMiddleware(socket.request, socket.request.res, next);
 // })
 
-require('./helpers/socket-helpers')(io)
+const socket = require('./helpers/socket-helpers')(io)
 
 
 app.set("view engine", "hbs");
@@ -70,6 +71,7 @@ app.use((req, res, next) => {
   // res.locals.account_messages = req.flash("account_messages");
   res.locals.user = helpers.getUser(req);
   res.locals.paramsUser = req.params.user;
+  req.io = io
   next();
 });
 

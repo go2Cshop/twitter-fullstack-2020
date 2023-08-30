@@ -8,6 +8,10 @@ module.exports = (io) => {
       console.log("message: " + msg);
     });
 
+    socket.on("notifyMessage", (msg) => {
+      console.log("message: " + msg);
+      io.emit('notifyMessage', msg)
+    });
 
     socket.on("disconnect", () => {
       console.log("user disconnected");

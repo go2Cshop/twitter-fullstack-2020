@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
-const { Tweet, User, Reply, Like, Followship, sequelize } = require("../models");
+const { Tweet, User, Reply, Like, Followship, Subscribeship, sequelize } = require("../models");
 const { getEightRandomUsers } = require("../helpers/randomUsersHelper");
 const helpers = require("../_helpers");
 const userController = {
@@ -92,6 +92,18 @@ const userController = {
           followerId: helpers.getUser(req).id,
           followingId: id
         })
+
+        // 將訊息通知被追蹤者
+        const notifyTo = `notify_to_${id}`
+        const notifyData = {
+          messageTitle: `${helpers.getUser(req).name} 開始追蹤你`,
+          messageContent: ``,
+          avatar: `${helpers.getUser(req).avatar}`,
+          tweetId: ``,
+          senderId: helpers.getUser(req).id
+        }
+        req.io.emit(notifyTo, notifyData)
+
         req.flash("info_messages", "追蹤成功！");
         return res.redirect('back')
       }
@@ -148,6 +160,7 @@ const userController = {
           },
           { model: User, as: "Followers" },
           { model: User, as: "Followings" },
+          { model: User, as: "Subscribers" }
         ],
         order: [["Tweets", "updatedAt", "DESC"]]
       });
@@ -157,6 +170,8 @@ const userController = {
       const recommend = await getEightRandomUsers(req);
 
       const isFollowed = user.Followers.some((l) => l.id === currentUserId);
+
+      const isSubscribed = user.Subscribers.some((l) => l.id === currentUserId)
 
       const tweets = user.Tweets.map((tweet) => {
         const replies = tweet.Replies.length;
@@ -183,6 +198,7 @@ const userController = {
         recommend,
         isUser,
         isFollowed,
+        isSubscribed
       };
 
       res.render("user/user-tweets", dataToRender);
@@ -330,9 +346,34 @@ const userController = {
       })
       .catch((err) => next(err));
   },
-  postSubcribe: async (req, res, next) => {
-    console.log(`------------${req.user.id}***********************`)
-    console.log(`**********************${req.params.userId}***********************`)
+  postSubscribe: async (req, res, next) => {
+    try {
+      const subscribingId = req.params.id
+      const subscriberId = req.user.id
+      if (subscriberId === subscribingId) throw new Error('不可訂閱自己')
+
+      const subscribeship = await Subscribeship.findOne({ where: { subscriberId, subscribingId } })
+      if (subscribeship) throw new Error('已經訂閱過')
+
+      await Subscribeship.create({ subscriberId, subscribingId })
+      res.redirect('back')
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteSubscribe: async (req, res, next) => {
+    try {
+      const subscriberId = req.user.id
+      const subscribingId = req.params.id
+      const subscribeship = await Subscribeship.findOne({
+        where: { subscriberId, subscribingId }
+      })
+      if (!subscribeship) throw new Error('尚未進行訂閱')
+      subscribeship.destroy()
+      res.redirect('back')
+    } catch (err) {
+      next(err)
+    }
   }
 };
 

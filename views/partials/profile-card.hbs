@@ -36,10 +36,10 @@
         <img src="/images/envelope.svg" class="justify-content-center" alt="">
       </a>
     </div>
-    {{#if this.isFollowed}}
+    {{#if this.isSubscribed}}
     <div class="d-flex justify-content-center align-items-center me-3"
       style="margin-top:7px; width:40px; height:40px;border-radius: 50px; border:1px solid #FF6600;">
-      <form action="" method="post">
+      <form action="/users/{{user.id}}/subscribe?_method=DELETE" method="post">
         <button style="border:none;background:none" type="submit">
           <img src="/images/bell-active.svg" class="justify-content-center" alt="">
         </button>

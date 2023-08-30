@@ -54,7 +54,8 @@ router.get("/tweets", authenticated, tweetsController.getTweets);
 router.post("/tweets", authenticated, tweetsController.postTweet);
 router.post("/users/:followingUserId/follow", userController.postFollow);
 
-router.post('/users/:id/subscribe', userController.postSubcribe) //訂閱其他使用者
+router.post('/users/:id/subscribe', authenticated, userController.postSubscribe) //訂閱其他使用者
+router.delete('/users/:id/subscribe', authenticated, userController.deleteSubscribe) //取消訂閱其他使用者
 router.get("/users/:id/tweets", authenticated, userController.getUser);
 router.get("/users/:id/replies", authenticated, replyController.getReplies);
 router.get("/users/:id/likes", authenticated, likesController.getLikes);
@@ -71,7 +72,8 @@ router.get("/settings", authenticated, userController.getSetting); // 個人資�
 router.put("/settings", authenticated, userController.putSetting); // 個人資料編輯
 
 router.get('/messages/notify', (req, res) => {
-  res.render('notify')
+  const user = req.user
+  res.render('chatroom/notify', user)
 })
 
 router.use('/', (req, res) => res.redirect('/tweets'));

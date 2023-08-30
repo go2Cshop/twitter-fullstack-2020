@@ -6,16 +6,17 @@
         <h1 style="font-weight:700; font-size:24px; margin:1.5rem">首頁</h1>
       </div>
       <div class="tweet-text-container position-relative">
-        <form action="/tweets" method="post" class="d-flex align-items-start m-3" style="height:130px">
+        <form action="/tweets" method="post" class="post-tweet-form d-flex align-items-start m-3" style="height:130px">
           <div class="avatar d-flex justify-content-center"
             style="width:50px; height:50px; border-radius:50%; background-color:#FF6600; overflow:hidden">
-            <img src="{{currentUser.avatar}}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" />
+            <img src="{{currentUser.avatar}}" alt=""
+              style="width:100%; height:100%; object-fit:cover; border-radius:50%;" />
           </div>
-          <input type="text" class="w-100" style="border:none; outline: none; background: none" placeholder="有什麼新鮮事?"
-            name="description" required />
+          <input type="text" class="post-tweet-input w-100" style="border:none; outline: none; background: none"
+            placeholder="有什麼新鮮事?" name="description" required />
           <div class="position-absolute bottom-0 end-0 d-flex align-items-center">
             {{#if error_messages}}
-              <p class="m-0" style="color:red;">{{error_messages}}</p>
+            <p class="m-0" style="color:red;">{{error_messages}}</p>
             {{/if}}
             <button type="submit"
               style="border: none; background: none; padding: 0; margin: 15px; cursor: pointer; background-color:#FF6600; width:64px; height:40px; border-radius:50px; color:white">推文</button>
@@ -23,20 +24,26 @@
         </form>
       </div>
       <div class="divider" style="height:10px; background-color:#E6ECF0"></div>
-      <div class="tweets-list" >
+      <div class="tweets-list">
         <div class="li-container">
-        {{#each tweets}}
+          {{#each tweets}}
           {{> tweet-li}}
-        {{/each}}
-
-        {{#if moreTweets}}
-          {{#each moreTweets}}
-            {{> tweet-li}}
           {{/each}}
-        {{/if}}
+
+          {{#if moreTweets}}
+          {{#each moreTweets}}
+          {{> tweet-li}}
+          {{/each}}
+          {{/if}}
         </div>
       </div>
     </div>
   </section>
   {{> recommendation}}
 </main>
+
+<div class="hidden d-none">
+  <p class="name">{{currentUser.name}}</p>
+  <p class="avatar">{{currentUser.avatar}}</p>
+  <p class="user-id">{{currentUser.id}}</p>
+</div>

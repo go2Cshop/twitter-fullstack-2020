@@ -24,12 +24,12 @@ module.exports = (sequelize, DataTypes) => {
       User.belongsToMany(User, {
         through: models.Subscribeship,
         foreignKey: "subscriberId",
-        as: "subscribers",
+        as: "Subscribings",
       })
       User.belongsToMany(User, {
         through: models.Subscribeship,
         foreignKey: "subscribingId",
-        as: "subscribings",
+        as: "Subscribers",
       })
     }
   }
