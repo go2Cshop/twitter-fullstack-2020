@@ -15,6 +15,39 @@
           </div>
         </a>
       </li>
+      <li class="ps-0">
+        <a href="/chatroom/noti">
+          <div class="icon">
+            {{#ifCond route "noti"}}
+            <img src="/images/chatroom/noti-active.svg" alt="noti-SVG" />
+            {{else}}
+            <img src="/images/chatroom/noti.svg" alt="noti-SVG" />
+            {{/ifCond}}
+          </div>
+        </a>
+      </li>
+      <li class="ps-0">
+        <a href="/chatroom/public">
+          <div class="icon">
+            {{#ifCond route "public"}}
+            <img src="/images/chatroom/public-active.svg" alt="public-SVG" />
+            {{else}}
+            <img src="/images/chatroom/public.svg" alt="public-SVG" />
+            {{/ifCond}}
+          </div>
+        </a>
+      </li>
+      <li class="ps-0">
+        <a href="/chatroom/private">
+          <div class="icon">
+            {{#ifCond route "private"}}
+            <img src="/images/chatroom/private-active.svg" alt="private-SVG" />
+            {{else}}
+            <img src="/images/chatroom/private.svg" alt="private-SVG" />
+            {{/ifCond}}
+          </div>
+        </a>
+      </li>
       <li>
         <a href="/users/{{currentUser.id}}/tweets">
           <div class="icon">
