@@ -21,6 +21,8 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "followerId",
         as: "Followings",
       });
+      User.hasMany(models.PrivateMsg, { foreignKey: "senderId"});
+      User.hasMany(models.PrivateMsg, { foreignKey: "receiverId" });
     }
   }
   User.init(

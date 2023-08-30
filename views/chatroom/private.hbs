@@ -1,22 +1,67 @@
-<style>
-  body { margin: 0; padding-bottom: 3rem; font-family: -apple-system,
-  BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; } #form
-  { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom:
-  0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box;
-  backdrop-filter: blur(10px); } #input { border: none; padding: 0 1rem;
-  flex-grow: 1; border-radius: 2rem; margin: 0.25rem; } #input:focus { outline:
-  none; } #form > button { background: #333; border: none; padding: 0 1rem;
-  margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; } #messages {
-  list-style-type: none; margin: 0; padding: 0; } #messages > li { padding:
-  0.5rem 1rem; } #messages > li:nth-child(odd) { background: #efefef; }
-</style>
-
-<section>
-  <ul id="messages"></ul>
-  <form id="form" action="">
-    <input id="input" autocomplete="off" /><button>Send</button>
-  </form>
+<section class="master-wrapper d-flex" style="height:100vh">
+  {{>sidebar-left}}
+  <div class="user-ist-wrapper" style="width:414px;border:1px solid #E6ECF0; height:100vh">
+    <div class="user-list-header d-flex align-items-center" style="height:7%; border-bottom:1px solid #E6ECF0">
+      <p class="m-0 ms-3" style="font-weight:700; font-size:24px">聊天</p>
+    </div>
+    <ul class="user-list p-0" style="overflow:auto; height:93%">
+      {{#each groups}}
+        <button class="user-button p-0" style="border: none;outline: none;background: none;width:100%;" data-user-id="{{this.user}}">
+          <li class="user-container d-flex align-items-center" style="list-style-type: none;height:69px; border:1px solid #E6ECF0">
+            <div class="avatar d-flex justify-content-center"
+              style="width:50px; height:50px; border-radius:50%; background-color:#FF6600; overflow:hidden">
+              <img src="{{this.chats.user.avatar}}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" />
+            </div>
+            <div class="name-text d-flex flex-column align-items-start flex-grow-1 ms-3">
+              <div class="name d-flex"><p class="account">{{this.chats.user.account}}</p><p class="name ms-1">@{{this.chats.user.name}}</p></div>
+              <div class="text">{{this.chats.chats.[0].text}}</div>
+            </div>
+            <div class="time"><p>{{relativeTimeFromNow this.chats.chats.[0].createdAt}}</p></div>
+          </li>
+        </button> 
+      {{/each}}
+    </ul>
+  </div>
+{{#if chats}}
+  <div class="chatbox flex-grow-1 position-relative" style="height:100vh">
+    <div class="chatter" style="height:7%; border-bottom:1px solid #E6ECF0">
+      <div class="user ms-3" style="">
+        <p class="account m-0" style="font-weight:700; font-size:24px">{{other.account}}</p>
+        <p class="name m-0">@{{other.name}}</p>
+      </div>
+    </div>
+    <div class="chat-content d-flex flex-column flex-frow-1 justify-content-end mt-3" style="overflow:auto; height:85%">
+      {{#each chats}}
+      
+      {{#ifCond this.sender.id @root.currentUserId}}
+      <div class="current-user d-flex flex-column align-items-end m-1">
+        <div class="content p-2" style="border-radius:25px 25px 0 25px; background:#FF6600;"><p class="m-0">{{this.text}}</p></div>
+        <div class="time top-100" style="font-size: 13px; color:#657786; text-align:end">{{hourTime this.createdAt}}</div>
+      </div>
+      {{else}}
+      <div class="other m-1 d-flex">
+        <div class="avatar me-2" style="width:40px; height:40px; border-radius:50%; background:gray">
+          <img src="{{@root.other.avatar}}" alt="" style="width:40px; height:40px; border-radius:50%;">
+        </div>
+        <div class="content-wrapper">
+          <div class="content p-2" style="border-radius:25px 25px 25px 0; background:#E6ECF0;"><p class="m-0">{{this.text}}</p></div>
+          <div class="time top-100" style="font-size: 13px; color:#657786; text-align:start">{{hourTime this.createdAt}}</div>
+        </div>
+      </div>
+      {{/ifCond}}
+      {{/each}}
+    </div>
+    <div class="input-form w-100" style="border-top:1px solid #E6ECF0; height:auto" >
+      <form id="form" action="" class="d-flex m-3">
+        <input id="input" autocomplete="off" class="flex-grow-1 ps-3" style="border-radius:50px; outline:none; border:none; background:#E6ECF0" />
+        <button type="submit" style=" border: none;  outline: none;  background: none;">
+          <img src="/images/message-send.svg" alt="" style="width:24px; height:24px">
+        </button>
+      </form>
+    </div>
+  </div>
+{{/if}}
 </section>
 
- <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script src="/javascripts/sockect.js"></script>

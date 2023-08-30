@@ -26,6 +26,7 @@ const io = new Server(server);
 //   sessionMiddleware(socket.request, socket.request.res, next);
 // })
 
+//後端處裡socket的位子
 require('./helpers/socket-helpers')(io)
 
 
