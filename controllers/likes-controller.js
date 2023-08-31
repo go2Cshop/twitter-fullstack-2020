@@ -7,26 +7,30 @@ const likeController = {
     try {
       const userId = req.params.id;
       const currentUserId = helpers.getUser(req).id;
-      const user = await User.findByPk(userId,{
+      const user = await User.findByPk(userId, {
         include: [{
           model: Like,
-          include: [{ model: Tweet,
-            include:[User, Like, Reply]}
+          include: [{
+            model: Tweet,
+            include: [User, Like, Reply]
+          }
           ]
         },
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ],
-        order: [["Likes","updatedAt", "DESC"]]
+        { model: User, as: 'Followings' },
+        { model: User, as: "Subscribers" }
+        ],
+        order: [["Likes", "updatedAt", "DESC"]]
       });
 
       if (user) {
         const userData = user.toJSON();
         const recommend = await getEightRandomUsers(req);
         const isFollowed = user.Followers.some((l) => l.id === currentUserId);
+        const isSubscribed = user.Subscribers.some(l => l.id === currentUserId)
         const likedTweets = user.Likes.map(e => {
           const replies = e.Tweet.Replies.length
-          const likes= e.Tweet.Likes.length
+          const likes = e.Tweet.Likes.length
           const isLiked = e.Tweet.Likes.some(l => l.UserId === currentUserId)
           const userAvatar = e.Tweet.User.avatar;
           return {
@@ -47,7 +51,8 @@ const likeController = {
           likedTweets,
           recommend,
           isUser,
-          isFollowed
+          isFollowed,
+          isSubscribed
         };
         console.log(likedTweets)
         res.render('user/user-likes', dataToRender);

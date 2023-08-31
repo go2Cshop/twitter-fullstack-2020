@@ -36,8 +36,11 @@ const sessionMiddleware = session({
 //   sessionMiddleware(socket.request, socket.request.res, next);
 // })
 
+const socket = require('./helpers/socket-helpers')(io)
+
+
 app.set("view engine", "hbs");
-app.engine("hbs", handlebars({ extname: ".hbs", helpers: handlebarsHelpers }));
+app.engine("hbs", handlebars({ defaultLayout: 'main', extname: ".hbs", helpers: handlebarsHelpers }));
 app.use(express.urlencoded({ extended: true }));
 
 //不用sessionMiddleware會讀不到socket.request.session.passport，不知道為什麼
@@ -64,16 +67,16 @@ app.use((req, res, next) => {
     account_messages,
   } = req.flash();
 
-   res.locals = {
-     currentUser: user,
-     success_messages,
-     error_messages,
-     warning_messages,
-     info_messages,
-     account_messages,
-     user: helpers.getUser(req),
-     paramsUser: req.params.user,
-   };
+  res.locals = {
+    currentUser: user,
+    success_messages,
+    error_messages,
+    warning_messages,
+    info_messages,
+    account_messages,
+    user: helpers.getUser(req),
+    paramsUser: req.params.user,
+  };
 
   // res.locals.currentUser = req.user;
   // res.locals.success_messages = req.flash("success_messages");
@@ -83,6 +86,7 @@ app.use((req, res, next) => {
   // res.locals.account_messages = req.flash("account_messages");
   res.locals.user = helpers.getUser(req);
   res.locals.paramsUser = req.params.user;
+  req.io = io
   next();
 });
 

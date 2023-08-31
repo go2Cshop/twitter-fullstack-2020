@@ -8,15 +8,16 @@ const replyController = {
     try {
       const userId = req.params.id;
       const currentUserId = req.user.id;
-      const user = await User.findByPk(userId,{
-        include: [{ 
-          model: Reply,include: [
-            {model: Tweet, include: [{model: User}]},
-            {model: User}]
-        }, 
+      const user = await User.findByPk(userId, {
+        include: [{
+          model: Reply, include: [
+            { model: Tweet, include: [{ model: User }] },
+            { model: User }]
+        },
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ],
+        { model: User, as: 'Followings' },
+        { model: User, as: "Subscribers" }
+        ],
         order: [["Replies", "updatedAt", "DESC"]]
       });
 
@@ -24,6 +25,7 @@ const replyController = {
         const userData = user.toJSON();
         const recommend = await getEightRandomUsers(req);
         const isFollowed = user.Followers.some((l) => l.id === currentUserId);
+        const isSubscribed = user.Subscribers.some((l) => l.id === currentUserId)
         const replies = user.Replies.map(reply => ({
           User: {
             account: reply.User.account,
@@ -31,7 +33,7 @@ const replyController = {
             id: reply.User.id,
             avatar: reply.User.avatar || DEFAULT_AVATAR
           },
-          Tweet:{
+          Tweet: {
             userAvatar: reply.Tweet.User.avatar,
             username: reply.Tweet.User.name,
             userId: reply.Tweet.User.id,
@@ -45,7 +47,8 @@ const replyController = {
           recommend,
           isUser,
           replies,
-          isFollowed
+          isFollowed,
+          isSubscribed
         };
 
         res.render('user/user-replies', dataToRender);
