@@ -15,15 +15,39 @@ const app = express();
 const port = process.env.PORT || 3000;
 const SESSION_SECRET = "secret";
 
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+// 創建全局變量存儲 io 對象
+global.io = io;
+
+//設置sessionMiddleware
+const sessionMiddleware = session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+})
+
 // use helpers.getUser(req) to replace req.user
 // use helpers.ensureAuthenticated(req) to replace req.isAuthenticated()
+// io.use((socket, next) => {
+//   sessionMiddleware(socket.request, socket.request.res, next);
+// })
 
 app.set("view engine", "hbs");
 app.engine("hbs", handlebars({ extname: ".hbs", helpers: handlebarsHelpers }));
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
-);
+
+//不用sessionMiddleware會讀不到socket.request.session.passport，不知道為什麼
+// app.use(
+//   session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
+// ); 
+app.use(sessionMiddleware)
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, socket.request.res, next);
+})
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
@@ -62,7 +86,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// 引入模組並將 io 對象傳遞給它們
+const publicSocketModule = require('./helpers/chatroom/publicSocket');
+const privateSocketModule = require('./helpers/socket-helpers');
+
+publicSocketModule(io);
+privateSocketModule(io);
+
+
 app.use(routes);
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+server.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 module.exports = app;
