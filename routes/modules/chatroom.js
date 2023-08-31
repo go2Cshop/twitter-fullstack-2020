@@ -7,6 +7,6 @@ router.get('/private', (req, res) => {
   res.render('chatroom/private')
 })
 
-router.get('/public', chatroomController.getPublic)
+router.get('/public', authenticated, chatroomController.getPublic)
 
 module.exports = router;
