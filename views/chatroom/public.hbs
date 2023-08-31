@@ -1,37 +1,36 @@
 <main class="d-flex justify-content-center">
   {{> sidebar-left route="public"}}
   <section style="width:414px; border:1px solid #E6ECF0">
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item align-middle ps-3 py-3"
-        style="border-left: none;border-right: none;font-weight: bold; font-size: 24px;">
+    <div class="border-bottom">
+      <div class="list-group-item align-middle ps-3 py-3"
+        style="font-weight: bold; font-size: 24px;">
         上線使用者(<span id="onlineCounts">0</span>)
-      </li>
+      </div>
       <p id="id" class="d-none">{{user.id}}</p>
       <p id="avatar" class="d-none">{{user.avatar}}</p>
       <h5 id='name' class="d-none">{{user.name}}</h5>
-    </ul>
-    <ul id="publicPeople" class="list-group overflow-auto" style="width: 24vw;">
-      <li class="list-group-item" style="border: none;">
-        <div id="onlinePeople">
-        </div>
-      </li>
-    </ul>
+
+    </div>
+    <div id="publicPeople" class="overflow-hidden" style="width: 414px;">
+      <ul class="list-group-item list-group-flush" style="border: none" id="onlinePeople">
+      </ul>
+    </div>
   </section>
   <section style="width:712px; border:1px solid #E6ECF0">
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item align-middle ps-3 py-3" style="font-weight: bold; font-size: 24px;">
+      <div class="border-bottom align-middle ps-3 py-3" style="font-weight: bold; font-size: 24px;">
         公開聊天室
-      </li>
-      <ul id="publicboard" class="list-group overflow-auto " style="max-height: 800px; overflow-y: scroll;">
+      </div>
+      <div>
+      <ul id="publicboard" class="list-group" style="max-height: 86vh; overflow-y: auto; ">
         <li class="list-group-item" style="border:none">
-          <div id='board' class="px-4 pb-5">
+          <div id='board' class="px-4 pb-5 justify-content-end">
             {{#each allMsg}}
             {{#ifCond ../user.id this.UserId}}
             <!--右邊訊息-->
             <div class=" d-flex flex-row-reverse">
-              <div class="col-3 flex-column">
-                <div>
-                  <p class="d-inline msgblockright " style="word-wrap:break-word">
+              <div class="flex-column"  style="max-width: 400px;">
+                <div style="border-radius:25px 25px 0 25px; background:#FF6600;" class="p-2">
+                  <p class="d-inline" style="word-wrap:break-word">
                     {{this.content}}</p>
                 </div>
                 <p class="text-muted mx-0 bd-highlight"
@@ -49,9 +48,9 @@
                     alt="avatar" />
                 </a>
               </div>
-              <div class="col-11 pl-0 mt-3">
-                <div>
-                  <p class="d-inline msgblockleft" style="word-wrap:break-word">{{this.content}}</p>
+              <div class="pl-0 mt-3" style="max-width: 400px;">
+                <div style="border-radius:0 25px 25px 25px ;background:#657786; display: inline-block; max-width: 100%" class="p-2 ">
+                  <p class="d-inline" style="word-wrap:break-word;">{{this.content}}</p>
                 </div>
                 <p class="text-muted mx-0"
                   style="font-size: 13px; padding-left: 1px; margin-top: 6px;line-height: 13px;">{{moment
@@ -65,19 +64,19 @@
           </div>
         </li>
       </ul>
-      <div class="list-group-item position-absolute bottom-0 col-6 px-2" id="msgInputBtn" style="bottom: 0; width:650px">
-        <div class="input-group">
+      </div>
+      <div class="list-group-item position-absolute bottom-0 col-6 p-3 border-top" id="msgInputBtn" style=" width:712px">
+        <div class="input-group" id="messages">
           <form id="form" action="" class="d-flex w-100">
             <input id="input" type="text" class="form-control bg-light w-100" placeholder="輸入訊息..." aria-label="msgInput"
               aria-describedby="button-addon2">
             <div class="input-group-append">
-              <button class="btn btn-tomato" id="button-addon2"><img src="/images/chatroom/right-arrow.svg"
+              <button type="submit" class="btn" id="button-addon2"><img src="/images/chatroom/right-arrow.svg"
                   alt="sendmsg"></button>
             </div>
           </form>
         </div>
       </div>
-    </ul>
   </section>
 </main>
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
