@@ -238,8 +238,8 @@ const userController = {
       const userId = req.params.id;
       const currentUserId = helpers.getUser(req).id;
       const user = await User.findByPk(userId, {
-        include: [
-          { model: User, as: 'Followers', include: { model: User, as: 'Followers' } },
+        include:[
+          { model: User, as: 'Followers', include: { model: User, as: 'Followers' }},
           { model: User, as: 'Followings', include: { model: User, as: 'Followers' }}
         ],
         order: [[sequelize.col('Followings.Followship.createdAt'), 'DESC']]

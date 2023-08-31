@@ -24,7 +24,6 @@ inputBackground.addEventListener('change', async () => {
   } catch (err) { console.log(err) }
 })
 
-
 deleteBgButton.addEventListener('click', async () => {
   try {
     const data = await axios.post(`/api/imagex`)
