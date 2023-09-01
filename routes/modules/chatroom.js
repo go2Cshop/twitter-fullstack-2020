@@ -10,4 +10,6 @@ router.get('/private', (req, res) => {
 router.get('/public', chatroomController.getPublic)
 router.get('/notify', chatroomController.getNotify)
 
+router.get('/user', chatroomController.fetchUser)
+
 module.exports = router;

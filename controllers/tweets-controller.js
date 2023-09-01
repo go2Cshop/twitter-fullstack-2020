@@ -77,7 +77,8 @@ const tweetsController = {
           messageContent: description,
           avatar: helpers.getUser(req).avatar,
           tweetId: tweet.id,
-          senderId: currentUserId
+          senderId: currentUserId,
+          type: 'notifyMsg'
         }
         req.io.emit(notifyTo, notifyData)
         // 開始寫入資料庫
@@ -146,7 +147,8 @@ const tweetsController = {
         messageContent: ``,
         avatar: `${helpers.getUser(req).avatar}`,
         tweetId: id,
-        senderId: currentUserId
+        senderId: currentUserId,
+        type: 'notifyMsg'
       }
       // 將訊息通知寫入資料庫
       await NotifyMsg.create({
@@ -222,7 +224,8 @@ const tweetsController = {
           messageContent: reply.comment,
           avatar: senderUser.avatar,
           tweetId: req.params.id,
-          senderId: senderUser.id
+          senderId: senderUser.id,
+          type: 'notifyMsg'
         }
         req.io.emit(notifyTo, notifyData)
         await NotifyMsg.create({
@@ -240,7 +243,8 @@ const tweetsController = {
         messageContent: reply.comment,
         avatar: senderUser.avatar,
         tweetId: req.params.id,
-        senderId: senderUser.id
+        senderId: senderUser.id,
+        type: 'notifyMsg'
       }
       await NotifyMsg.create({
         senderId: currentUserId,
