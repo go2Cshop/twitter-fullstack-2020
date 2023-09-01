@@ -35,8 +35,8 @@
       
       {{#ifCond this.sender.id @root.currentUserId}}
       <div class="current-user d-flex flex-column align-items-end m-1">
-        <div class="content p-2" style="border-radius:25px 25px 0 25px; background:#FF6600;"><p class="m-0">{{this.text}}</p></div>
-        <div class="time top-100" style="font-size: 13px; color:#657786; text-align:end">{{hourTime this.createdAt}}</div>
+        <div class="content p-2" style="border-radius:25px 25px 0 25px; background:#FF6600;"><p class="content-text m-0">{{this.text}}</p></div>
+        <div class="time top-100" style="font-size: 13px; color:#657786; text-align:end">{{relativeTimeFromNow this.createdAt}}</div>
       </div>
       {{else}}
       <div class="other m-1 d-flex">
@@ -45,7 +45,7 @@
         </div>
         <div class="content-wrapper">
           <div class="content p-2" style="border-radius:25px 25px 25px 0; background:#E6ECF0;"><p class="m-0">{{this.text}}</p></div>
-          <div class="time top-100" style="font-size: 13px; color:#657786; text-align:start">{{hourTime this.createdAt}}</div>
+          <div class="time top-100" style="font-size: 13px; color:#657786; text-align:start">{{relativeTimeFromNow this.createdAt}}</div>
         </div>
       </div>
       {{/ifCond}}
@@ -60,8 +60,13 @@
       </form>
     </div>
   </div>
+  <div class="d-none" id="selected-user-id">{{other.id}}</div>
+{{/if}}
+
+{{#if currentUser}}
+<div class="d-none" id="current-user-id">{{currentUser.id}}</div>
 {{/if}}
 </section>
 
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-<script src="/javascripts/sockect.js"></script>
+<script src="/javascripts/chatroom/privateScoket.js"></script>

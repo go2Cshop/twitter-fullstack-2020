@@ -1,0 +1,70 @@
+<main class="d-flex justify-content-center">
+  {{> sidebar-left route="notify"}}
+
+  <section style="min-width: 635px;border:1px solid #E6ECF0;">
+    <div style="margin-top:24px; height: 51px;border-bottom:1px solid #E6ECF0;">
+      <p style="margin:0 23px;font-weight: 700;font-size:24px">通知</p>
+    </div>
+    <ul class="notify-msg-group" style="padding:0 15px">
+      {{!-- 透過javascript render資料 --}}
+
+      {{!-- 透過res.render --}}
+      {{#each messages}}
+      <li style="margin-top: 16px;list-style-type: none;border-bottom: 1px solid #E6ECF0">
+        <a style="text-decoration: none;" href="http://localhost:3000/users/{{this.User.id}}/tweets">
+          <img style="width: 30px;height:30px; border-radius:50% ; object-fit: cover;" src="{{this.User.avatar}}"
+            alt="">
+        </a>
+        {{#if this.isFollowMsg}}
+        <a style="text-decoration: none;" href="http://localhost:3000/users/{{this.User.id}}/tweets">
+          <p style="font-weight: 700;margin-bottom:8px;color: #171725;">{{this.titleMsg}}</p>
+        </a>
+        {{else}}
+        <a style="text-decoration: none;" href="/tweets/{{this.tweetId}}/replies">
+          <p style="font-weight: 700;margin-bottom:8px;color: #171725;">{{this.titleMsg}}</p>
+          <p style="margin-bottom:8px; color: #171725;">{{this.mainMsg}}</p>
+        </a>
+        {{/if }}
+
+      </li>
+      {{/each}}
+    </ul>
+  </section>
+  <div class="d-none">
+    <p class="user-id">
+      {{user.id}}
+    </p>
+  </div>
+  {{> recommendation}}
+</main>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  const notifyMsgGroup = document.querySelector('.notify-msg-group')
+
+  const notifyTo = `notify_to_${document.querySelector('.user-id').textContent.trim()}`
+
+  socket.on(notifyTo, (data) => {
+    console.log(data)
+    const message = document.createElement('li')
+    message.style.cssText = `
+    margin-top: 16px;
+    list-style-type: none;
+    border-bottom: 1px solid #E6ECF0;
+    `
+    message.innerHTML += `
+        <a style="text-decoration: none;" href="http://localhost:3000/users/${data.senderId}/tweets">
+          <img style="width: 30px;height:30px; border-radius:50% ; object-fit: cover;"
+            src="${data.avatar}"alt="">
+        </a>
+        <p style="font-weight: 700;margin-bottom:8px;">${data.messageTitle}</p>
+        <a style="text-decoration: none;" href="/tweets/${data.tweetId}/replies">
+          <p style="margin-bottom:8px; color: #171725;">${data.messageContent}</p>
+        </a>
+    `
+
+    notifyMsgGroup.insertAdjacentElement('afterbegin', message)
+  })
+
+</script>

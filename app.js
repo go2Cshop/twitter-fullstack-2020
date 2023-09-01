@@ -20,22 +20,38 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+
+// 創建全局變量存儲 io 對象
+// global.io = io;
+
+//設置sessionMiddleware
+const sessionMiddleware = session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+})
+
 // use helpers.getUser(req) to replace req.user
 // use helpers.ensureAuthenticated(req) to replace req.isAuthenticated()
 // io.use((socket, next) => {
 //   sessionMiddleware(socket.request, socket.request.res, next);
 // })
 
-//後端處裡socket的位子
-require('./helpers/socket-helpers')(io)
+const socket = require('./helpers/socket-helpers')(io)
 
 
 app.set("view engine", "hbs");
-app.engine("hbs", handlebars({ extname: ".hbs", helpers: handlebarsHelpers }));
+app.engine("hbs", handlebars({ defaultLayout: 'main', extname: ".hbs", helpers: handlebarsHelpers }));
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
-);
+
+//不用sessionMiddleware會讀不到socket.request.session.passport，不知道為什麼
+// app.use(
+//   session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
+// ); 
+app.use(sessionMiddleware)
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, socket.request.res, next);
+})
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
@@ -52,16 +68,16 @@ app.use((req, res, next) => {
     account_messages,
   } = req.flash();
 
-   res.locals = {
-     currentUser: user,
-     success_messages,
-     error_messages,
-     warning_messages,
-     info_messages,
-     account_messages,
-     user: helpers.getUser(req),
-     paramsUser: req.params.user,
-   };
+  res.locals = {
+    currentUser: user,
+    success_messages,
+    error_messages,
+    warning_messages,
+    info_messages,
+    account_messages,
+    user: helpers.getUser(req),
+    paramsUser: req.params.user,
+  };
 
   // res.locals.currentUser = req.user;
   // res.locals.success_messages = req.flash("success_messages");
@@ -71,9 +87,16 @@ app.use((req, res, next) => {
   // res.locals.account_messages = req.flash("account_messages");
   res.locals.user = helpers.getUser(req);
   res.locals.paramsUser = req.params.user;
+  req.io = io
   next();
 });
 
+// 引入模組並將 io 對象傳遞給它們
+const publicSocketModule = require('./helpers/chatroom/publicSocket');
+const privateSocketModule = require('./helpers/socket-helpers');
+
+publicSocketModule(io);
+privateSocketModule(io);
 
 
 app.use(routes);

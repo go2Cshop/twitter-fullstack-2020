@@ -1,0 +1,84 @@
+<main class="d-flex justify-content-center">
+  {{> sidebar-left route="public"}}
+  <section style="width:414px; border:1px solid #E6ECF0">
+    <div class="border-bottom">
+      <div class="list-group-item align-middle ps-3 py-3"
+        style="font-weight: bold; font-size: 24px;">
+        上線使用者(<span id="onlineCounts">0</span>)
+      </div>
+      <p id="id" class="d-none">{{user.id}}</p>
+      <p id="avatar" class="d-none">{{user.avatar}}</p>
+      <h5 id='name' class="d-none">{{user.name}}</h5>
+
+    </div>
+    <div id="publicPeople" class="overflow-hidden" style="width: 414px;">
+      <ul class="list-group-item list-group-flush" style="border: none" id="onlinePeople">
+      </ul>
+    </div>
+  </section>
+  <section style="width:712px; border:1px solid #E6ECF0">
+      <div class="border-bottom align-middle ps-3 py-3" style="font-weight: bold; font-size: 24px;">
+        公開聊天室
+      </div>
+      <div>
+      <ul id="publicboard" class="list-group" style="max-height: 86vh; overflow-y: auto; ">
+        <li class="list-group-item" style="border:none">
+          <div id='board' class="px-4 pb-5 justify-content-end">
+            {{#each allMsg}}
+            {{#ifCond ../user.id this.UserId}}
+            <!--右邊訊息-->
+            <div class=" d-flex flex-row-reverse">
+              <div class="flex-column"  style="max-width: 400px;">
+                <div style="border-radius:25px 25px 0 25px; background:#FF6600;" class="p-2">
+                  <p class="d-inline" style="word-wrap:break-word">
+                    {{this.content}}</p>
+                </div>
+                <p class="text-muted mx-0 bd-highlight"
+                  style="font-size: 0.675em; padding-left: 0.3rem; margin-top: 0.3rem;">
+                  {{moment this.createdAt}}</p>
+              </div>
+            </div>
+            <!--右邊訊息-->
+            {{ else }}
+            <!--左邊訊息-->
+            <div class="d-flex row">
+              <div class="col-1 d-flex justify-content-center">
+                <a href="/users/{{this.UserId}}/tweets" class="p-1">
+                  <img src='{{this.User.avatar}}' class="rounded-circle" style="width: 40px; height: 40px"
+                    alt="avatar" />
+                </a>
+              </div>
+              <div style="max-width: 400px;">
+                <p>{{this.User.name}}</p>
+                <div style="border-radius:0 25px 25px 25px ;background:#657786; display: inline-block; max-width: 100%" class="p-2 ">
+                  <p class="d-inline" style="word-wrap:break-word;">{{this.content}}</p>
+                </div>
+                <p class="text-muted mx-0"
+                  style="font-size: 13px; padding-left: 1px; margin-top: 6px;line-height: 13px;">{{moment
+                  this.createdAt}}</p>
+              </div>
+            </div>
+            <!--左邊訊息-->
+            {{/ifCond}}
+            {{/each}}
+            {{!--each msg--}}
+          </div>
+        </li>
+      </ul>
+      </div>
+      <div class="list-group-item position-absolute bottom-0 col-6 p-3 border-top" id="msgInputBtn" style=" width:712px">
+        <div class="input-group" id="messages">
+          <form id="form" action="" class="d-flex w-100">
+            <input id="input" type="text" class="form-control bg-light w-100" placeholder="輸入訊息..." aria-label="msgInput"
+              aria-describedby="button-addon2">
+            <div class="input-group-append">
+              <button type="submit" class="btn" id="button-addon2"><img src="/images/chatroom/right-arrow.svg"
+                  alt="sendmsg"></button>
+            </div>
+          </form>
+        </div>
+      </div>
+  </section>
+</main>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src='/javascripts/chatroom/publicSocket.js'></script>

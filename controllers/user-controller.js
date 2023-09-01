@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
-const { Tweet, User, Reply, Like, Followship, sequelize} = require("../models");
+const { Tweet, User, Reply, Like, Followship, Subscribeship, NotifyMsg, sequelize } = require("../models");
 const { getEightRandomUsers } = require("../helpers/randomUsersHelper");
 const helpers = require("../_helpers");
 const userController = {
@@ -92,6 +92,26 @@ const userController = {
           followerId: helpers.getUser(req).id,
           followingId: id
         })
+
+        // 將訊息通知被追蹤者
+        const notifyTo = `notify_to_${id}`
+        const notifyData = {
+          messageTitle: `${helpers.getUser(req).name} 開始追蹤你`,
+          messageContent: '',
+          avatar: `${helpers.getUser(req).avatar}`,
+          tweetId: '',
+          senderId: helpers.getUser(req).id
+        }
+        // 將訊息通知寫入資料庫
+        await NotifyMsg.create({
+          senderId: helpers.getUser(req).id,
+          receiverId: id,
+          titleMsg: notifyData.messageTitle,
+          mainMsg: notifyData.messageContent,
+          tweetId: null
+        })
+        req.io.emit(notifyTo, notifyData)
+
         req.flash("info_messages", "追蹤成功！");
         return res.redirect('back')
       }
@@ -131,32 +151,35 @@ const userController = {
     }
   },
   getUser: async (req, res, next) => {
-  const isUser =
-    helpers.getUser(req).id === Number(req.params.id) ? true : false;
-  try {
-    const userId = req.params.id;
-    const currentUserId = helpers.getUser(req).id;
-    const user = await User.findByPk(userId, {
-      include: [
-        {
-          model: Tweet,
-          include: [
-            { model: User },
-            { model: Reply, include: [{ model: Tweet }] },
-            { model: Like },
-          ]
-        },
-        { model: User, as: "Followers" },
-        { model: User, as: "Followings" },
-      ],
-      order: [["Tweets","updatedAt", "DESC"]]
-    });
+    const isUser =
+      helpers.getUser(req).id === Number(req.params.id) ? true : false;
+    try {
+      const userId = req.params.id;
+      const currentUserId = helpers.getUser(req).id;
+      const user = await User.findByPk(userId, {
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: User },
+              { model: Reply, include: [{ model: Tweet }] },
+              { model: Like },
+            ]
+          },
+          { model: User, as: "Followers" },
+          { model: User, as: "Followings" },
+          { model: User, as: "Subscribers" }
+        ],
+        order: [["Tweets", "updatedAt", "DESC"]]
+      });
 
-    if (!user) throw new Error('使用者不存在')
+      if (!user) throw new Error('使用者不存在')
       const userData = user.toJSON();
       const recommend = await getEightRandomUsers(req);
 
       const isFollowed = user.Followers.some((l) => l.id === currentUserId);
+
+      const isSubscribed = user.Subscribers.some((l) => l.id === currentUserId)
 
       const tweets = user.Tweets.map((tweet) => {
         const replies = tweet.Replies.length;
@@ -183,6 +206,7 @@ const userController = {
         recommend,
         isUser,
         isFollowed,
+        isSubscribed
       };
 
       res.render("user/user-tweets", dataToRender);
@@ -231,7 +255,6 @@ const userController = {
       next(err)
     }
   },
-
   getFollowing: async (req, res, next) => {
     // 跟隨中
     try {
@@ -240,7 +263,7 @@ const userController = {
       const user = await User.findByPk(userId, {
         include: [
           { model: User, as: 'Followers', include: { model: User, as: 'Followers' } },
-          { model: User, as: 'Followings', include: { model: User, as: 'Followers' }}
+          { model: User, as: 'Followings', include: { model: User, as: 'Followers' } }
         ],
         order: [[sequelize.col('Followings.Followship.createdAt'), 'DESC']]
       });
@@ -331,6 +354,35 @@ const userController = {
       })
       .catch((err) => next(err));
   },
+  postSubscribe: async (req, res, next) => {
+    try {
+      const subscribingId = req.params.id
+      const subscriberId = req.user.id
+      if (subscriberId === subscribingId) throw new Error('不可訂閱自己')
+
+      const subscribeship = await Subscribeship.findOne({ where: { subscriberId, subscribingId } })
+      if (subscribeship) throw new Error('已經訂閱過')
+
+      await Subscribeship.create({ subscriberId, subscribingId })
+      res.redirect('back')
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteSubscribe: async (req, res, next) => {
+    try {
+      const subscriberId = req.user.id
+      const subscribingId = req.params.id
+      const subscribeship = await Subscribeship.findOne({
+        where: { subscriberId, subscribingId }
+      })
+      if (!subscribeship) throw new Error('尚未進行訂閱')
+      subscribeship.destroy()
+      res.redirect('back')
+    } catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = userController;

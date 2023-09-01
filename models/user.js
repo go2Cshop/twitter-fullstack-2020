@@ -23,6 +23,18 @@ module.exports = (sequelize, DataTypes) => {
       });
       User.hasMany(models.PrivateMsg, { foreignKey: "senderId"});
       User.hasMany(models.PrivateMsg, { foreignKey: "receiverId" });
+      User.belongsToMany(User, {
+        through: models.Subscribeship,
+        foreignKey: "subscriberId",
+        as: "Subscribings",
+      })
+      User.belongsToMany(User, {
+        through: models.Subscribeship,
+        foreignKey: "subscribingId",
+        as: "Subscribers",
+      })
+      User.hasMany(models.NotifyMsg, { foreignKey: 'senderId' })
+      User.hasMany(models.PublicMsg, { foreignKey: "UserId" });
     }
   }
   User.init(

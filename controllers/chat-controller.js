@@ -49,7 +49,6 @@ const chatController = {
   getPrivateChats: async (req, res, next) => {
     try {
       const groups = await fetchChatList(req);
-
       res.render("chatroom/private", { groups });
     } catch (err) {
       next(err);
@@ -81,12 +80,11 @@ const chatController = {
           { model: User, as: "sender" },
           { model: User, as: "receiver" },
         ],
-        order: [["createdAt", "DESC"]],
+        order: [["createdAt", "ASC"]],
         nest: true,
         raw: true,
       });
       const other = await User.findByPk(selectedId, { raw: true });
-      console.log(other)
       res.render("chatroom/private", { groups, other, chats, currentUserId });
     } catch (err) {
       next(err);
