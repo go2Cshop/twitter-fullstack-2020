@@ -42,17 +42,18 @@
 <script>
   const socket = io();
   const notifyMsgGroup = document.querySelector('.notify-msg-group')
+  const notifyIcon = document.querySelector('.notify-icon')
 
   const notifyTo = `notify_to_${document.querySelector('.user-id').textContent.trim()}`
 
   socket.on(notifyTo, (data) => {
-    console.log(data)
     const message = document.createElement('li')
     message.style.cssText = `
     margin-top: 16px;
     list-style-type: none;
     border-bottom: 1px solid #E6ECF0;
     `
+
     message.innerHTML += `
         <a style="text-decoration: none;" href="http://localhost:3000/users/${data.senderId}/tweets">
           <img style="width: 30px;height:30px; border-radius:50% ; object-fit: cover;"
@@ -63,7 +64,6 @@
           <p style="margin-bottom:8px; color: #171725;">${data.messageContent}</p>
         </a>
     `
-
     notifyMsgGroup.insertAdjacentElement('afterbegin', message)
   })
 

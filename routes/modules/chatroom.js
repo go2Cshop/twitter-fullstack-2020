@@ -1,9 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const chatController = require('../../controllers/chat-controller')
+const chatroomController = require('../../controllers/chatroom-controller')
 const { authenticated } = require("../../middleware/auth");
 
-router.get('/private', chatController.getPrivateChats )
-router.get('/private/:id', chatController.getChatBox)
+router.get('/private', chatroomController.getPrivateChats )
+router.get('/private/:id', chatroomController.getChatBox)
+router.get("/public", authenticated, chatroomController.getPublic);
+router.get("/notify", authenticated, chatroomController.getNotify);
+router.get('/user', chatroomController.fetchUser)
 
 module.exports = router;

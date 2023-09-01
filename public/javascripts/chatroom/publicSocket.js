@@ -99,7 +99,7 @@ socket.on('chat message', (data) => {
         </a>
       </div>
       <div style="max-width: 400px;">
-       <p>${data.User}</p>
+      <p class="mb-0">${data.user}</p>
         <div style="border-radius:0 25px 25px 25px;background:#657786;display: inline-block; max-width: 100%" class="p-2">
           <p class="d-inline" style="word-wrap:break-word">${data.msg}</p>
         </div>
@@ -111,9 +111,6 @@ socket.on('chat message', (data) => {
     board.appendChild(newMsg)
   }
   publicboard.scrollTo(0, publicboard.scrollHeight)
-  var item = document.createElement('div');
-  item.textContent = msg;
-  messages.appendChild(item);
   window.scrollTo(0, document.body.scrollHeight);
 });
 

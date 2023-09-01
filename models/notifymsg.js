@@ -19,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     receiverId: DataTypes.INTEGER,
     mainMsg: DataTypes.TEXT,
     titleMsg: DataTypes.TEXT,
-    tweetId: DataTypes.INTEGER
+    tweetId: DataTypes.INTEGER,
+    isRead: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'NotifyMsg',

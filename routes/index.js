@@ -3,6 +3,8 @@ const router = express.Router();
 const passport = require("../config/passport");
 const upload = require("../middleware/multer");
 
+const { User, NotifyMsg } = require('../models')
+
 const tweetsController = require('../controllers/tweets-controller')
 const userController = require('../controllers/user-controller')
 const replyController = require('../controllers/reply-controller')
@@ -12,9 +14,11 @@ const apiController = require('../controllers/api-controller')
 const { authenticated, authenticatedAdmin } = require("../middleware/auth");
 const { generalErrorHandler } = require("../middleware/error-handler");
 const admin = require("./modules/admin");
-const chatroom = require('./modules/chatroom')
+const chatroom = require('./modules/chatroom');
+const { includes } = require("lodash");
 
 router.use("/admin", admin);
+router.use('/chatroom', chatroom)
 router.use('/chatroom', chatroom)
 
 router.get("/signup", userController.signupPage);
@@ -56,6 +60,8 @@ router.post("/users/:followingUserId/follow", userController.postFollow);
 
 router.post('/users/:id/subscribe', authenticated, userController.postSubscribe) //訂閱其他使用者
 router.delete('/users/:id/subscribe', authenticated, userController.deleteSubscribe) //取消訂閱其他使用者
+router.post('/users/:id/subscribe', authenticated, userController.postSubscribe) //訂閱其他使用者
+router.delete('/users/:id/subscribe', authenticated, userController.deleteSubscribe) //取消訂閱其他使用者
 router.get("/users/:id/tweets", authenticated, userController.getUser);
 router.get("/users/:id/replies", authenticated, replyController.getReplies);
 router.get("/users/:id/likes", authenticated, likesController.getLikes);
@@ -70,6 +76,10 @@ router.post('/api/image', upload.fields([
 router.post('/api/imagex', authenticated, apiController.deleteImage)
 router.get("/settings", authenticated, userController.getSetting); // 個人資料設定
 router.put("/settings", authenticated, userController.putSetting); // 個人資料編輯
+
+router.get('/user', async (req, res) => {
+  res.send(req.user)
+})
 
 router.use('/', (req, res) => res.redirect('/tweets'));
 router.use("/", generalErrorHandler);

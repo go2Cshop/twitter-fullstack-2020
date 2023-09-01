@@ -31,16 +31,11 @@ const sessionMiddleware = session({
   saveUninitialized: false
 })
 
-// use helpers.getUser(req) to replace req.user
-// use helpers.ensureAuthenticated(req) to replace req.isAuthenticated()
-// io.use((socket, next) => {
-//   sessionMiddleware(socket.request, socket.request.res, next);
-// })
 
-const socket = require('./helpers/socket-helpers')(io)
 
 
 app.set("view engine", "hbs");
+app.engine("hbs", handlebars({ defaultLayout: 'main', extname: ".hbs", helpers: handlebarsHelpers }));
 app.engine("hbs", handlebars({ defaultLayout: 'main', extname: ".hbs", helpers: handlebarsHelpers }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -78,6 +73,16 @@ app.use((req, res, next) => {
     user: helpers.getUser(req),
     paramsUser: req.params.user,
   };
+  res.locals = {
+    currentUser: user,
+    success_messages,
+    error_messages,
+    warning_messages,
+    info_messages,
+    account_messages,
+    user: helpers.getUser(req),
+    paramsUser: req.params.user,
+  };
 
   // res.locals.currentUser = req.user;
   // res.locals.success_messages = req.flash("success_messages");
@@ -92,11 +97,10 @@ app.use((req, res, next) => {
 });
 
 // 引入模組並將 io 對象傳遞給它們
-const publicSocketModule = require('./helpers/chatroom/publicSocket');
-const privateSocketModule = require('./helpers/socket-helpers');
 
-publicSocketModule(io);
-privateSocketModule(io);
+
+const socket = require("./helpers/socket-helpers")(io);
+
 
 
 app.use(routes);

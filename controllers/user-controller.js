@@ -100,7 +100,8 @@ const userController = {
           messageContent: '',
           avatar: `${helpers.getUser(req).avatar}`,
           tweetId: '',
-          senderId: helpers.getUser(req).id
+          senderId: helpers.getUser(req).id,
+          type: 'notifyMsg'
         }
         // 將訊息通知寫入資料庫
         await NotifyMsg.create({
