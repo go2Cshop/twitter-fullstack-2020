@@ -19,6 +19,7 @@ const { includes } = require("lodash");
 
 router.use("/admin", admin);
 router.use('/chatroom', chatroom)
+router.use('/chatroom', chatroom)
 
 router.get("/signup", userController.signupPage);
 router.post("/signup", userController.signup);
@@ -57,6 +58,8 @@ router.get("/tweets", authenticated, tweetsController.getTweets);
 router.post("/tweets", authenticated, tweetsController.postTweet);
 router.post("/users/:followingUserId/follow", userController.postFollow);
 
+router.post('/users/:id/subscribe', authenticated, userController.postSubscribe) //訂閱其他使用者
+router.delete('/users/:id/subscribe', authenticated, userController.deleteSubscribe) //取消訂閱其他使用者
 router.post('/users/:id/subscribe', authenticated, userController.postSubscribe) //訂閱其他使用者
 router.delete('/users/:id/subscribe', authenticated, userController.deleteSubscribe) //取消訂閱其他使用者
 router.get("/users/:id/tweets", authenticated, userController.getUser);

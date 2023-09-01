@@ -173,217 +173,272 @@ const userController = {
         ],
         order: [["Tweets", "updatedAt", "DESC"]]
       });
+      const isUser =
+        helpers.getUser(req).id === Number(req.params.id) ? true : false;
+      try {
+        const userId = req.params.id;
+        const currentUserId = helpers.getUser(req).id;
+        const user = await User.findByPk(userId, {
+          include: [
+            {
+              model: Tweet,
+              include: [
+                { model: User },
+                { model: Reply, include: [{ model: Tweet }] },
+                { model: Like },
+              ]
+            },
+            { model: User, as: "Followers" },
+            { model: User, as: "Followings" },
+            { model: User, as: "Subscribers" }
+          ],
+          order: [["Tweets", "updatedAt", "DESC"]]
+        });
 
-      if (!user) throw new Error('使用者不存在')
-      const userData = user.toJSON();
-      const recommend = await getEightRandomUsers(req);
+        if (!user) throw new Error('使用者不存在')
+        if (!user) throw new Error('使用者不存在')
+        const userData = user.toJSON();
+        const recommend = await getEightRandomUsers(req);
 
-      const isFollowed = user.Followers.some((l) => l.id === currentUserId);
+        const isFollowed = user.Followers.some((l) => l.id === currentUserId);
 
-      const isSubscribed = user.Subscribers.some((l) => l.id === currentUserId)
+        const isSubscribed = user.Subscribers.some((l) => l.id === currentUserId)
 
-      const tweets = user.Tweets.map((tweet) => {
-        const replies = tweet.Replies.length;
-        const likes = tweet.Likes.length;
-        const isLiked = tweet.Likes.some((l) => l.UserId === currentUserId);
-        const userAvatar = tweet.User.avatar;
-        return {
-          tweetId: tweet.id,
-          userId: tweet.User.id,
-          userAccount: tweet.User.account,
-          userName: tweet.User.name,
-          text: tweet.description,
-          createdAt: tweet.createdAt,
-          replies,
-          likes,
-          isLiked,
-          userAvatar,
-        };
-      });
+        const isSubscribed = user.Subscribers.some((l) => l.id === currentUserId)
 
-      const dataToRender = {
-        user: userData,//這邊剛好命名是user 不是users
-        tweets,
-        recommend,
-        isUser,
-        isFollowed,
+        const tweets = user.Tweets.map((tweet) => {
+          const replies = tweet.Replies.length;
+          const likes = tweet.Likes.length;
+          const isLiked = tweet.Likes.some((l) => l.UserId === currentUserId);
+          const userAvatar = tweet.User.avatar;
+          return {
+            tweetId: tweet.id,
+            userId: tweet.User.id,
+            userAccount: tweet.User.account,
+            userName: tweet.User.name,
+            text: tweet.description,
+            createdAt: tweet.createdAt,
+            replies,
+            likes,
+            isLiked,
+            userAvatar,
+          };
+        });
+
+        const dataToRender = {
+          user: userData,//這邊剛好命名是user 不是users
+          tweets,
+          recommend,
+          isUser,
+          isFollowed,
+          isSubscribed
         isSubscribed
-      };
-
-      res.render("user/user-tweets", dataToRender);
-    } catch (err) {
-      next(err)
-    }
-  },
-  getFollower: async (req, res, next) => {
-    // 跟隨者
-    try {
-      const userId = req.params.id;
-      const user = await User.findByPk(userId, {
-        include: [
-          { model: User, as: 'Followers', include: { model: User, as: 'Followers' } },
-          { model: User, as: 'Followings', include: { model: User, as: 'Followers' } }
-        ],
-        order: [[sequelize.col('Followers.Followship.createdAt'), 'DESC']]
-      });
-
-      if (!user) throw new Error('使用者不存在')
-      const userData = user.toJSON();
-      const recommend = await getEightRandomUsers(req);
-      const follows = user.Followers.map((e) => {
-        const isnotUser = e.id !== helpers.getUser(req).id;
-        const isFollowed = e.Followers.some(
-          (f) => f.id === helpers.getUser(req).id
-        );
-        return {
-          id: e.id,
-          name: e.name,
-          avatar: e.avatar,
-          introduction: e.introduction ? e.introduction.substring(0, 50) : null,
-          isFollowed,
-          isnotUser,
         };
-      });
 
-      const dataToRender = {
-        user: userData,
-        recommend,
-        follows,
-      };
+        res.render("user/user-tweets", dataToRender);
+      } catch (err) {
+        next(err)
+      }
+    },
+    getFollower: async (req, res, next) => {
+      // 跟隨者
+      try {
+        const userId = req.params.id;
+        const user = await User.findByPk(userId, {
+          include: [
+            { model: User, as: 'Followers', include: { model: User, as: 'Followers' } },
+            { model: User, as: 'Followings', include: { model: User, as: 'Followers' } }
+          ],
+          order: [[sequelize.col('Followers.Followship.createdAt'), 'DESC']]
+        });
 
-      res.render("user/user-follower", dataToRender);
-    } catch (err) {
-      next(err)
-    }
-  },
-  getFollowing: async (req, res, next) => {
-    // 跟隨中
-    try {
-      const userId = req.params.id;
-      const currentUserId = helpers.getUser(req).id;
-      const user = await User.findByPk(userId, {
-        include: [
-          { model: User, as: 'Followers', include: { model: User, as: 'Followers' } },
-          { model: User, as: 'Followings', include: { model: User, as: 'Followers' } }
-        ],
-        order: [[sequelize.col('Followings.Followship.createdAt'), 'DESC']]
-      });
+        if (!user) throw new Error('使用者不存在')
+        const userData = user.toJSON();
+        const recommend = await getEightRandomUsers(req);
+        const follows = user.Followers.map((e) => {
+          const isnotUser = e.id !== helpers.getUser(req).id;
+          const isFollowed = e.Followers.some(
+            (f) => f.id === helpers.getUser(req).id
+          );
+          return {
+            id: e.id,
+            name: e.name,
+            avatar: e.avatar,
+            introduction: e.introduction ? e.introduction.substring(0, 50) : null,
+            isFollowed,
+            isnotUser,
+          };
+        });
 
-      if (!user) throw new Error('使用者不存在')
-      const userData = user.toJSON();
-      const recommend = await getEightRandomUsers(req);
-      const follows = user.Followings.map((e) => {
-        const isnotUser = e.id !== helpers.getUser(req).id
-        const isFollowed = e.Followers.some(f => f.id === helpers.getUser(req).id)
-        return {
-          id: e.id,
-          name: e.name,
-          avatar: e.avatar,
-          introduction: e.introduction ? e.introduction.substring(0, 50) : null,
-          isFollowed,
-          isnotUser
+        const dataToRender = {
+          user: userData,
+          recommend,
+          follows,
         };
-      });
-      const dataToRender = {
-        user: userData,
-        recommend,
-        follows,
-      };
-      res.render("user/user-following", dataToRender);
-    } catch (err) {
-      next(err);
-    }
-  },
-  getSetting: (req, res) => {
-    // 取得帳戶設定頁面
-    return User.findByPk(helpers.getUser(req).id).then((user) => {
-      user = user.toJSON();
-      const { name, account, email } = user;
-      return res.render("settings", { name, account, email });
-    });
-  },
-  putSetting: (req, res, next) => {
-    const { account, name, email, password, checkPassword } = req.body;
-    const userId = req.user.id;
-    const emailPromise = User.findOne({
-      where: { email, id: { [Op.ne]: userId } },
-    });
-    const accountPromise = User.findOne({
-      where: { account, id: { [Op.ne]: userId } },
-    });
-    let mailMsg = "";
-    let accountMsg = "";
-    let passwordMsg = "";
-    let nameMsg = "";
 
-    if (!account || !name || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填')
+        res.render("user/user-follower", dataToRender);
+      } catch (err) {
+        next(err)
+      }
+    },
+      getFollowing: async (req, res, next) => {
+        // 跟隨中
+        try {
+          const userId = req.params.id;
+          const currentUserId = helpers.getUser(req).id;
+          const user = await User.findByPk(userId, {
+            include: [
+              { model: User, as: 'Followers', include: { model: User, as: 'Followers' } },
+              { model: User, as: 'Followings', include: { model: User, as: 'Followers' } }
+          { model: User, as: 'Followings', include: { model: User, as: 'Followers' } }
+            ],
+            order: [[sequelize.col('Followings.Followship.createdAt'), 'DESC']]
+          });
 
-    return Promise.all([emailPromise, accountPromise])
-      .then(([mailUser, accountUser]) => {
-        if (mailUser) {
-          mailMsg = '此信箱已被使用'
+          if (!user) throw new Error('使用者不存在')
+          const userData = user.toJSON();
+          const recommend = await getEightRandomUsers(req);
+          const follows = user.Followings.map((e) => {
+            const isnotUser = e.id !== helpers.getUser(req).id
+            const isFollowed = e.Followers.some(f => f.id === helpers.getUser(req).id)
+            return {
+              id: e.id,
+              name: e.name,
+              avatar: e.avatar,
+              introduction: e.introduction ? e.introduction.substring(0, 50) : null,
+              isFollowed,
+              isnotUser
+            };
+          });
+          const dataToRender = {
+            user: userData,
+            recommend,
+            follows,
+          };
+          res.render("user/user-following", dataToRender);
+        } catch (err) {
+          next(err);
         }
-        if (accountUser) {
-          accountMsg = '此帳號已被使用'
-        }
-        if (password !== checkPassword) {
-          passwordMsg = '密碼與確認密碼不相符'
-        }
-        if (name.length > 50) {
-          nameMsg = '字數超出上限！'
-        }
-        if (mailMsg || accountMsg || passwordMsg || nameMsg) {
-          return res.render('settings', { nameMsg, mailMsg, accountMsg, passwordMsg, account, name, email })
-        } else {
-          Promise.all([
-            User.findByPk(userId),
-            bcrypt.hash(password, 10)
-          ])
-            .then(([user, hashedPassword]) => {
-              return user.update({
-                account,
-                name,
-                email,
-                password: hashedPassword,
-              });
-            })
-            .then(() => {
-              req.flash('success_messages', '編輯成功 !')
-              res.redirect('/settings')
-            })
-        }
-      })
-      .catch((err) => next(err));
-  },
-  postSubscribe: async (req, res, next) => {
-    try {
-      const subscribingId = req.params.id
-      const subscriberId = req.user.id
-      if (subscriberId === subscribingId) throw new Error('不可訂閱自己')
+      },
+        getSetting: (req, res) => {
+          // 取得帳戶設定頁面
+          return User.findByPk(helpers.getUser(req).id).then((user) => {
+            user = user.toJSON();
+            const { name, account, email } = user;
+            return res.render("settings", { name, account, email });
+          });
+        },
+          putSetting: (req, res, next) => {
+            const { account, name, email, password, checkPassword } = req.body;
+            const userId = req.user.id;
+            const emailPromise = User.findOne({
+              where: { email, id: { [Op.ne]: userId } },
+            });
+            const accountPromise = User.findOne({
+              where: { account, id: { [Op.ne]: userId } },
+            });
+            let mailMsg = "";
+            let accountMsg = "";
+            let passwordMsg = "";
+            let nameMsg = "";
 
-      const subscribeship = await Subscribeship.findOne({ where: { subscriberId, subscribingId } })
-      if (subscribeship) throw new Error('已經訂閱過')
+            if (!account || !name || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填')
 
-      await Subscribeship.create({ subscriberId, subscribingId })
-      res.redirect('back')
-    } catch (err) {
-      next(err)
-    }
-  },
-  deleteSubscribe: async (req, res, next) => {
-    try {
-      const subscriberId = req.user.id
-      const subscribingId = req.params.id
-      const subscribeship = await Subscribeship.findOne({
-        where: { subscriberId, subscribingId }
-      })
-      if (!subscribeship) throw new Error('尚未進行訂閱')
-      subscribeship.destroy()
-      res.redirect('back')
-    } catch (err) {
-      next(err)
-    }
-  }
-};
+            return Promise.all([emailPromise, accountPromise])
+              .then(([mailUser, accountUser]) => {
+                if (mailUser) {
+                  mailMsg = '此信箱已被使用'
+                }
+                if (accountUser) {
+                  accountMsg = '此帳號已被使用'
+                }
+                if (password !== checkPassword) {
+                  passwordMsg = '密碼與確認密碼不相符'
+                }
+                if (name.length > 50) {
+                  nameMsg = '字數超出上限！'
+                }
+                if (mailMsg || accountMsg || passwordMsg || nameMsg) {
+                  return res.render('settings', { nameMsg, mailMsg, accountMsg, passwordMsg, account, name, email })
+                } else {
+                  Promise.all([
+                    User.findByPk(userId),
+                    bcrypt.hash(password, 10)
+                  ])
+                    .then(([user, hashedPassword]) => {
+                      return user.update({
+                        account,
+                        name,
+                        email,
+                        password: hashedPassword,
+                      });
+                    })
+                    .then(() => {
+                      req.flash('success_messages', '編輯成功 !')
+                      res.redirect('/settings')
+                    })
+                }
+              })
+              .catch((err) => next(err));
+          },
+            postSubscribe: async (req, res, next) => {
+              try {
+                const subscribingId = req.params.id
+                const subscriberId = req.user.id
+                if (subscriberId === subscribingId) throw new Error('不可訂閱自己')
 
-module.exports = userController;
+                const subscribeship = await Subscribeship.findOne({ where: { subscriberId, subscribingId } })
+                if (subscribeship) throw new Error('已經訂閱過')
+
+                await Subscribeship.create({ subscriberId, subscribingId })
+                res.redirect('back')
+              } catch (err) {
+                next(err)
+              }
+            },
+              deleteSubscribe: async (req, res, next) => {
+                try {
+                  const subscriberId = req.user.id
+                  const subscribingId = req.params.id
+                  const subscribeship = await Subscribeship.findOne({
+                    where: { subscriberId, subscribingId }
+                  })
+                  if (!subscribeship) throw new Error('尚未進行訂閱')
+                  subscribeship.destroy()
+                  res.redirect('back')
+                } catch (err) {
+                  next(err)
+                }
+              }
+    postSubscribe: async (req, res, next) => {
+      try {
+        const subscribingId = req.params.id
+        const subscriberId = req.user.id
+        if (subscriberId === subscribingId) throw new Error('不可訂閱自己')
+
+        const subscribeship = await Subscribeship.findOne({ where: { subscriberId, subscribingId } })
+        if (subscribeship) throw new Error('已經訂閱過')
+
+        await Subscribeship.create({ subscriberId, subscribingId })
+        res.redirect('back')
+      } catch (err) {
+        next(err)
+      }
+    },
+      deleteSubscribe: async (req, res, next) => {
+        try {
+          const subscriberId = req.user.id
+          const subscribingId = req.params.id
+          const subscribeship = await Subscribeship.findOne({
+            where: { subscriberId, subscribingId }
+          })
+          if (!subscribeship) throw new Error('尚未進行訂閱')
+          subscribeship.destroy()
+          res.redirect('back')
+        } catch (err) {
+          next(err)
+        }
+      }
+  };
+
+  module.exports = userController;
