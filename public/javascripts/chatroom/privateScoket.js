@@ -15,8 +15,8 @@ userList.addEventListener("click", (e) => {
     const selectedId = parseInt(button.dataset.userId, 10);
     const sortedNumbers = [currentUserId, selectedId].sort((a, b) => a - b);
     const selectedRoomName = `chatRoom${sortedNumbers}`;
-    socket.emit("join room", selectedRoomName);
     localStorage.setItem("selectedRoomName", selectedRoomName);
+    socket.emit("join room", selectedRoomName);
     window.location.href = `/chatroom/private/${selectedId}`;
   }
 });
@@ -41,13 +41,14 @@ if (selectedRoom) {
       senderId:parseInt(currentUserId),
       receiverId:selectedId,
     }
-    socket.emit("private message", { data:messageData});
+    socket.emit("private message", { data:messageData}, selectedRoom);
     chatContent.appendChild(template);
     input.value = "";
   }
 });
 
-socket.on("private message", (data) => {
+socket.on("private message", (data, room) => {
+  
   console.log("前端收到io.to.emit", data);
   const currentTime = getCurrentTime();
   if (parseInt(data.senderId) !== currentUserId) {

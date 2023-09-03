@@ -45,13 +45,13 @@ module.exports = (io) => {
       console.log(`User joined room: ${roomName}`);
     });
 
-    socket.on("private message", async ({ room, data }) => {
+    socket.on("private message", async ({ data }, selectedRoom) => {
       PrivateMsg.create({
         text: data.text,
         senderId: data.senderId,
         receiverId: data.receiverId,
       });
-      io.emit("private message", data);
+      socket.to(selectedRoom).emit("private message", data);
     });
 
     socket.on("disconnect", () => {
