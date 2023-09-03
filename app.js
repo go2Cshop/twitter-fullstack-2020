@@ -2,8 +2,6 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 const express = require("express");
-const https = require("https");
-const fs = require("fs");
 const handlebarsHelpers = require("./helpers/handlebars-helpers");
 const handlebars = require("express-handlebars");
 const flash = require("connect-flash");
@@ -17,17 +15,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 const SESSION_SECRET = "secret";
 
-// 读取SSL证书和私钥文件
-const privateKey = fs.readFileSync("path/to/private-key.pem", "utf8");
-const certificate = fs.readFileSync("path/to/certificate.pem", "utf8");
-
-const credentials = { key: privateKey, cert: certificate };
-
-// 创建HTTPS服务器
-const server = https.createServer(credentials, app);
-
-// const http = require("http");
-// const server = http.createServer(app);
+const http = require("http");
+const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
